@@ -16,7 +16,16 @@ static FormalContext* fail(char* line, FormalContext* ctx)
 /* TODO : libérer noms, matrice d'incidence et structure. */
 void ctx_free(FormalContext* ctx)
 {
-    
+    for (size_t i = 0; i < ctx->nb_obj; i++){
+        free(ctx->obj_names[i]);
+    }
+    free(ctx->obj_names);
+    for (size_t i = 0; i < ctx->nb_att; i++){
+        free((*ctx)->att_names[i]);
+    }
+    free(ctx->att_names);
+
+    free(ctx->incidence);    
     free(ctx);
     (void)ctx;
 }

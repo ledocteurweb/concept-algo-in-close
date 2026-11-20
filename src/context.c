@@ -21,7 +21,7 @@ void ctx_free(FormalContext* ctx)
     }
     free(ctx->obj_names);
     for (size_t i = 0; i < ctx->nb_att; i++){
-        free((*ctx)->att_names[i]);
+        free(ctx->att_names[i]);
     }
     free(ctx->att_names);
 

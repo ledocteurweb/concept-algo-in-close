@@ -16,6 +16,7 @@ static FormalContext* fail(char* line, FormalContext* ctx)
 /* TODO : libérer noms, matrice d'incidence et structure. */
 void ctx_free(FormalContext* ctx)
 {
+    //Liberation du nom de l_objet contenu dans la case i, de même pour le nom de l'attribut contenue dans la case j
     for (size_t i = 0; i < ctx->nb_obj; i++){
         free(ctx->obj_names[i]);
     }

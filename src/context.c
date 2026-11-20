@@ -16,6 +16,8 @@ static FormalContext* fail(char* line, FormalContext* ctx)
 /* TODO : libérer noms, matrice d'incidence et structure. */
 void ctx_free(FormalContext* ctx)
 {
+    
+    free(ctx);
     (void)ctx;
 }
 
@@ -76,6 +78,65 @@ FormalContext* ctx_read(FILE* f)
      *    puis  return fail(line, ctx);
      */
     /* TODO */
+ctx = calloc(1,sizeof(FormalContext));
+    if(ctx==NULL){
+        fprintf(stderr, "Erreur d'allocation \n");
+        return fail(line, ctx);
+    }
+
+    ctx->nb_obj = nb_obj;
+    ctx->nb_att=nb_att;
+    ctx->nb_word_att=nb_att / 64 + (nb_att%64 !=0);
+    ctx->nb_word_obj=nb_obj / 64 + (nb_obj%64 !=0);
+
+    if(nb_obj == 0){
+        ctx->obj_names = calloc(1,sizeof(char*));
+    }
+    else{
+        ctx->obj_names=calloc(nb_obj,sizeof(char*));
+    }
+
+    if(ctx->obj_names==0){
+        fprintf(stderr, "Erreur d'allocation \n");
+        return fail(line, ctx);      
+    }
+
+
+
+
+    if(nb_att == 0 ){
+        ctx->att_names = calloc(1,sizeof(char*))
+    }
+    else{
+        ctx->att_names=calloc(nb_att,sizeof(char*));
+    }
+    if(ctx->att_names==NULL){
+        fprintf(stderr, "Erreur d'allocation \n");
+        return fail(line, ctx);      
+    } 
+
+    //Verification de la taille max qu'on devra utiliser comme premier argument dans notre calloc si le produit dépasse la valeur max de sizeof on renvoie une erreur 
+    if (ctx->nb_word_obj != 0 &&
+        nb_att > SIZE_MAX / sizeof(word) / ctx->nb_word_obj) {
+        fprintf(stderr, "Dimensions trop grandes\n");
+        return fail(line, ctx);
+    }
+
+    size_t n = ctx->nb_att*ctx->nb_word_obj;
+    if(n==0){
+        ctx->incidence = calloc(1 , sizeof(word));
+    }
+    else{
+        ctx->incidence = calloc(n, sizeof(word));
+    }
+    if(ctx->incidence==NULL){
+        fprintf(stderr, "Erreur d'allocation \n");
+        return fail(line, ctx);      
+    } 
+
+
+    
+    
 
     /* 7. Noms des objets */
     for (size_t i = 0; i < nb_obj; i++) {
@@ -85,6 +146,12 @@ FormalContext* ctx_read(FILE* f)
         }
         /* TODO : stocker une copie de `line` dans ctx->obj_names[i]
            (échec d'allocation => message + return fail(line, ctx);) */
+        ctx->obj_names[j]=malloc(strlen(line)+1);
+            if(ctx->obj_names[j]==NULL){
+                fprintf(stderr, "Erreur d'allocation \n");
+                return fail(line, ctx);      
+            } 
+        strcpy(ctx->obj_names[j],line);
     }
 
     /* 8. Noms des attributs */
@@ -94,6 +161,12 @@ FormalContext* ctx_read(FILE* f)
             return fail(line, ctx);
         }
         /* TODO : stocker une copie de `line` dans ctx->att_names[j] */
+        ctx->att_names[j]=malloc(strlen(line)+1);
+            if(ctx->att_names[j]==NULL){
+                fprintf(stderr, "Erreur d'allocation \n");
+                return fail(line, ctx);      
+            } 
+        strcpy(ctx->att_names[j],line);
     }
 
     /* 9. Matrice d'incidence : une ligne par objet, un caractère par attribut
@@ -111,6 +184,7 @@ FormalContext* ctx_read(FILE* f)
             if (line[j] == 'X') {
                 /* TODO : mettre à 1 le bit de l'objet i dans l'extent
                    de l'attribut j (dans ctx->incidence) */
+                ctx->incidence[j*ctx->nb_word_obj + i/64] |= ((word)1 << (i%64));
             } else if (line[j] != '.') {
                 fprintf(stderr,
                     "Erreur : caractère '%c' invalide pour l'objet %zu, attribut %zu.\n",
